@@ -1,0 +1,3 @@
+[submodule "Prism/vendor/GLFW"]
+	path = Prism/vendor/GLFW
+	url = https://github.com/Or4kel/glfw.git
