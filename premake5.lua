@@ -57,7 +57,7 @@ project "Prism"
         "%{prj.name}/src",
         "%{includedir.GLFW}",
         --"%{includedir.ImGui}",
-        --"%{includedir.spdlog}",
+        "%{includedir.spdlog}",
         --"%{includedir.glm}",
         --"%{includedir.stb_image}",
         "%{includedir.Vulkan}",
@@ -76,13 +76,13 @@ project "Prism"
 	}
 	
 	filter "configurations:Debug"
-        defines "Prism_DEBUG"
+        defines "PR_DEBUG"
         runtime "Debug"
 		buildoptions "/MT" -- to not conflict with shaderc
 		symbols "On"
 
 	filter "configurations:Release"
-        defines "Prism_RELEASE"
+        defines "PR_RELEASE"
         runtime "Release"
 		optimize "On"
 
@@ -104,7 +104,8 @@ project "Game"
 	}
 
 	includedirs {
-        "Prism/src"--,
+		"Prism/src",
+        "%{includedir.spdlog}"
         --"%{includedir.glm}"
 	}
 	
@@ -113,12 +114,12 @@ project "Game"
 	}
 	
 	filter "configurations:Debug"
-		defines "Prism_DEBUG"
+		defines "PR_DEBUG"
 		runtime "Debug"
 		buildoptions "/MT" -- to not conflict with shaderc
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "Prism_RELEASE"
+		defines "PR_RELEASE"
 		runtime "Release"
 		optimize "On"
