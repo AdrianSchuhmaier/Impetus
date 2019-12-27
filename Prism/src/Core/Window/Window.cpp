@@ -22,13 +22,23 @@ namespace Prism {
 		}
 
 		PR_CORE_ASSERT(s_Initialized, "Window initialization failed!");
+		
+		GLFWmonitor* monitor = nullptr;
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, props.resizable);
+		
+		if (props.fullscreen)
+		{			
+			monitor = glfwGetPrimaryMonitor();
+			auto mode = glfwGetVideoMode(monitor);
+			props.width = mode->width;
+			props.height = mode->height;
+		}
 
 		auto window = std::make_unique<Window>(props);
 		window->m_WindowHandle = glfwCreateWindow(props.width, props.height,
-			props.title.c_str(), nullptr, nullptr);
+			props.title.c_str(), monitor, nullptr);
 
 		window->SetGLFWCallbacks();
 
@@ -39,8 +49,7 @@ namespace Prism {
 		: m_Properties{ props }
 		, m_WindowData{ props }
 	{
-		m_WindowData.callback = [&](Event& e) { m_Callback(e); };
-		m_Callback = [](Event& e) {
+		m_WindowData.callback = [](Event& e) {
 			PR_CORE_WARN("Cannot invoke callback for window - no callback set!");
 		};
 	}
@@ -63,7 +72,7 @@ namespace Prism {
 
 	void Window::SetEventCallback(const EventCallbackFn& callback)
 	{
-		m_Callback = callback;
+		m_WindowData.callback = callback;
 	}
 
 	void Window::SetGLFWCallbacks()

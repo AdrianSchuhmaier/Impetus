@@ -20,8 +20,8 @@ namespace Prism {
 		// Try to handle event as type T
 		// Returns false if T is the wrong type
 		// Otherwise, the event is handled with function f
-		template<typename T>
-		bool Handle(std::function<bool(T&)> f)
+		template<typename T, typename F>
+		bool Handle(const F& f)
 		{
 			if (GetType() != T::GetStaticType())
 				return false;
@@ -32,7 +32,7 @@ namespace Prism {
 
 		bool handled = false;
 	};
-
+	
 	// Define Static + Dynamic Type for check in Dispatch
 #define DEFINE_EVENT_TYPE(type)\
 	static Event::Type GetStaticType() { return type; }\

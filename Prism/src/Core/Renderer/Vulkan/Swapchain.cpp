@@ -1,12 +1,13 @@
 #include "pch.h"
-#include "VulkanSwapchain.h"
+#include "Swapchain.h"
+#include "RenderPass.h"
 
-namespace Prism {
+namespace Prism::Vulkan {
 	// forward declarations
 	vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
 	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
 
-	void VulkanSwapchain::Create(vk::Device device, vk::Extent2D size, vk::SurfaceKHR surface)
+	void Swapchain::Create(vk::Device device, vk::Extent2D size, vk::SurfaceKHR surface)
 	{
 		vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(supportDetails.formats);
 		vk::PresentModeKHR presentMode = chooseSwapPresentMode(supportDetails.presentModes);
@@ -41,19 +42,17 @@ namespace Prism {
 		for (auto image : images)
 			imageViews.push_back(CreateImageView(device, image));
 
-		// if there's already a template render pass, create framebuffers (else call SetRenderPass)
-		if (renderPass)
-			CreateFrameBuffers(device);
+		CreateFrameBuffers(device);
 	}
 
-	void VulkanSwapchain::Recreate(vk::Device device, vk::Extent2D extent, vk::SurfaceKHR surface)
+	void Swapchain::Recreate(vk::Device device, vk::Extent2D extent, vk::SurfaceKHR surface)
 	{
 		device.waitIdle();
 		CleanUp(device);
 		Create(device, extent, surface);
 	}
 
-	void VulkanSwapchain::CleanUp(vk::Device device)
+	void Swapchain::CleanUp(vk::Device device)
 	{
 		for (const auto& framebuffer : framebuffers)
 			device.destroyFramebuffer(framebuffer);
@@ -66,9 +65,12 @@ namespace Prism {
 		device.destroySwapchainKHR(swapchain);
 	}
 
-	void VulkanSwapchain::CreateFrameBuffers(vk::Device device)
+	void Swapchain::CreateFrameBuffers(vk::Device device, std::optional<vk::RenderPass> rp)
 	{
 		PR_CORE_ASSERT(framebuffers.size() < 1, "There should be no Framebuffers at this point");
+
+		if (rp.has_value()) renderPass = rp;
+		else if (!renderPass.has_value()) renderPass = RenderPass::GetDefaultPass().GetHandle();
 
 		framebuffers.reserve(imageViews.size());
 		for (int i = 0; i < imageViews.size(); i++)
@@ -88,7 +90,7 @@ namespace Prism {
 
 
 
-	vk::ImageView VulkanSwapchain::CreateImageView(vk::Device device, vk::Image image)
+	vk::ImageView Swapchain::CreateImageView(vk::Device device, vk::Image image)
 	{
 		vk::ImageViewCreateInfo createInfo({},
 			image,

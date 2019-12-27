@@ -4,12 +4,16 @@
 #include "GLFW/glfw3.h"
 #include "vulkan/vulkan.hpp"
 
-#include "VulkanSwapchain.h"
+#include "Swapchain.h"
 
 
-namespace Prism {
-	class VulkanContext
+namespace Prism::Vulkan {
+
+	class Context
 	{
+	public:
+		struct Queue { vk::Queue queue; uint32_t familyIndex = 0; };
+
 	public:
 		static void Init(const Window* window);
 		static void CleanUp();
@@ -24,6 +28,12 @@ namespace Prism {
 				m_Surface.get());
 		}
 
+		static vk::PhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
+		static vk::Device GetDevice() { return m_Device; }
+		static Queue& GetGraphicsQueue() { return m_GraphicsQueue; }
+		static Queue& GetTransferQueue() { return m_TransferQueue; }
+		static Swapchain& GetSwapchain() { return m_Swapchain; }
+
 	private:
 		static GLFWwindow* m_WindowHandle;
 
@@ -32,11 +42,10 @@ namespace Prism {
 		static vk::PhysicalDevice m_PhysicalDevice;
 		static vk::Device m_Device;
 
-		struct Queue { vk::Queue queue; uint32_t familyIndex = 0; };
 		static Queue m_GraphicsQueue;
 		static Queue m_TransferQueue;
 
-		static VulkanSwapchain m_Swapchain;
+		static Swapchain m_Swapchain;
 
 	private:
 		static vk::UniqueInstance CreateInstance();

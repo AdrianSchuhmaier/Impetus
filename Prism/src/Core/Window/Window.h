@@ -10,7 +10,8 @@ namespace Prism {
 		{
 			std::string title = "Prism";
 			uint32_t width = 1280, height = 720;
-			bool resizable = false;
+			bool fullscreen = false;
+			bool resizable = true;
 		};
 
 		using EventCallbackFn = std::function<void(Event&)>;
@@ -44,7 +45,6 @@ namespace Prism {
 	private:
 		Properties m_Properties;
 		WindowData m_WindowData;
-		EventCallbackFn m_Callback;
 
 		void* m_WindowHandle = nullptr; // GLFWwindow*
 

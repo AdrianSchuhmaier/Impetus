@@ -1,26 +1,26 @@
 #include "pch.h"
-#include "VulkanContext.h"
+#include "Context.h"
 
 #include <map>
 
-namespace Prism {
+namespace Prism::Vulkan {
 
-	GLFWwindow* VulkanContext::m_WindowHandle = nullptr;
+	GLFWwindow* Context::m_WindowHandle = nullptr;
 
-	vk::UniqueInstance VulkanContext::m_Instance;
-	vk::UniqueSurfaceKHR VulkanContext::m_Surface;
-	vk::PhysicalDevice VulkanContext::m_PhysicalDevice;
-	vk::Device VulkanContext::m_Device;
+	vk::UniqueInstance Context::m_Instance;
+	vk::UniqueSurfaceKHR Context::m_Surface;
+	vk::PhysicalDevice Context::m_PhysicalDevice;
+	vk::Device Context::m_Device;
 
-	VulkanContext::Queue VulkanContext::m_GraphicsQueue;
-	VulkanContext::Queue VulkanContext::m_TransferQueue;
-	VulkanSwapchain VulkanContext::m_Swapchain;
+	Context::Queue Context::m_GraphicsQueue;
+	Context::Queue Context::m_TransferQueue;
+	Swapchain Context::m_Swapchain;
 
 	constexpr const char* VALIDATION_LAYER = "VK_LAYER_LUNARG_standard_validation";
 	constexpr const char* SWAPCHAIN_EXT = "VK_KHR_swapchain";
 	bool useValidation = false;
 
-	void VulkanContext::Init(const Window* window)
+	void Context::Init(const Window* window)
 	{
 		m_WindowHandle = static_cast<GLFWwindow*>(window->GetWindowHandle());
 		PR_CORE_ASSERT(m_WindowHandle, "Cannot find GLFWwindow handle!");
@@ -41,15 +41,15 @@ namespace Prism {
 			m_Surface.get());
 	}
 
-	void VulkanContext::CleanUp()
+	void Context::CleanUp()
 	{
 		m_Device.waitIdle();
 		m_Swapchain.CleanUp(m_Device);
 		m_Device.destroy();
-		PR_CORE_TRACE("VulkanContext destructed.");
+		PR_CORE_TRACE("Context destructed.");
 	}
 
-	vk::UniqueInstance VulkanContext::CreateInstance()
+	vk::UniqueInstance Context::CreateInstance()
 	{
 		vk::ApplicationInfo appInfo(
 			"Prism", VK_MAKE_VERSION(1, 0, 0), // Application
@@ -69,7 +69,8 @@ namespace Prism {
 			availableExtensions.begin(), availableExtensions.end(), available.begin(),
 			[](const vk::ExtensionProperties& ex) { return ex.extensionName; });
 
-#ifdef PR_DEBUG
+		//TODO: disable validation in Release build
+#if 1 //def PR_DEBUG
 		required.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
 		// check if all required extensions are available
@@ -102,7 +103,7 @@ namespace Prism {
 		return vk::createInstanceUnique(createInfo);
 	}
 
-	vk::UniqueSurfaceKHR VulkanContext::CreateSurface()
+	vk::UniqueSurfaceKHR Context::CreateSurface()
 	{
 		std::vector<char const*> extensions;
 
@@ -117,7 +118,7 @@ namespace Prism {
 		);
 	}
 
-	std::pair<vk::Device, vk::PhysicalDevice> VulkanContext::SelectDeviceAndQueues()
+	std::pair<vk::Device, vk::PhysicalDevice> Context::SelectDeviceAndQueues()
 	{
 		PR_CORE_INFO("Selecting graphics device to use for Vulkan");
 		// query for available
@@ -125,7 +126,7 @@ namespace Prism {
 		PR_CORE_ASSERT(!availableDevices.empty(), "No physical graphics device found");
 
 		// Save devices in a ordered (descending) map
-		std::map<int, VkPhysicalDevice, std::greater<int>> devices;
+		std::map<int, VkPhysicalDevice, std::less<int>> devices;
 
 		// list devices and sort them based on a score
 		PR_CORE_TRACE("Graphics devices found: ");
@@ -162,7 +163,7 @@ namespace Prism {
 
 			// get the QueueFamilyProperties of the first PhysicalDevice
 			auto queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
-			const uint32_t availableQueueFamilyCount = queueFamilyProperties.size();
+			const uint32_t availableQueueFamilyCount = (uint32_t)queueFamilyProperties.size();
 			uint32_t graphicsQueueFamilyIndex = availableQueueFamilyCount;
 			uint32_t transferQueueFamilyIndex = availableQueueFamilyCount;
 
@@ -223,5 +224,4 @@ namespace Prism {
 		}
 		PR_CORE_ASSERT(false, "No suitable device for Vulkan found!");
 	}
-
 }

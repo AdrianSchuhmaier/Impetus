@@ -58,7 +58,7 @@ project "Prism"
         "%{includedir.GLFW}",
         --"%{includedir.ImGui}",
         "%{includedir.spdlog}",
-        --"%{includedir.glm}",
+        "%{includedir.glm}",
         --"%{includedir.stb_image}",
         "%{includedir.Vulkan}",
         "%{includedir.VulkanShader}"
@@ -105,8 +105,8 @@ project "Game"
 
 	includedirs {
 		"Prism/src",
-        "%{includedir.spdlog}"
-        --"%{includedir.glm}"
+        "%{includedir.spdlog}",
+        "%{includedir.glm}"
 	}
 	
 	links {
