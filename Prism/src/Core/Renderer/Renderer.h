@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Core/Window/Window.h"
+#include "Core/Renderer/BufferUtil.h"
 
-#include "RenderObject.h"
+#include "Components/RenderComponent.h"
+
+#include <set>
 
 namespace Prism {
 	class Renderer
@@ -14,11 +17,13 @@ namespace Prism {
 		static void Prepare();
 		static void Render();
 
-		static void Register(const std::shared_ptr<RenderObject>&);
-
 		static void Resize(uint32_t width, uint32_t height);
 
-	private:
-		static std::vector<std::weak_ptr<RenderObject>> renderObjects;
+		static RenderObjectHandle Register(const RenderComponent& component);
+		static void Unregister(RenderObjectHandle component);
+
+		// TODO: change datastructure
+		static std::set<uint32_t> freeIndices;
+		static std::vector<RenderObject> renderObjects;
 	};
 }

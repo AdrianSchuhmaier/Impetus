@@ -7,7 +7,7 @@ namespace Prism::Vulkan {
 
 	Pipeline::Pipeline(
 		const Shader::SpirV& code,
-		const VertexBuffer::Descriptor& descriptor,
+		const VertexBufferDescriptor& descriptor,
 		const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts,
 		const std::vector<vk::PushConstantRange>& pushConstants)
 	{
@@ -37,13 +37,10 @@ namespace Prism::Vulkan {
 		m_VertexInputBindingDescription = bindingDescription;
 		m_VertexInputAttributeDescriptions = attributeDescriptions;
 
-		//m_VertexInputCreateInfo = vk::PipelineVertexInputStateCreateInfo({},
-		//	1, &m_VertexInputBindingDescription,
-		//	m_VertexInputAttributeDescriptions.size(),
-		//	m_VertexInputAttributeDescriptions.data());
-
 		m_VertexInputCreateInfo = vk::PipelineVertexInputStateCreateInfo({},
-			0, nullptr, 0, nullptr);
+			1, &m_VertexInputBindingDescription,
+			m_VertexInputAttributeDescriptions.size(),
+			m_VertexInputAttributeDescriptions.data());
 
 		m_InputAssemblyCreateInfo = vk::PipelineInputAssemblyStateCreateInfo({}, topology);
 	}

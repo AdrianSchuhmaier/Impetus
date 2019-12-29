@@ -6,6 +6,8 @@
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/ShaderLibrary.h"
 
+#include "Components/RenderComponent.h"
+
 #include "Shader.h"
 
 namespace Prism {
@@ -21,10 +23,9 @@ namespace Prism {
 	} g_Frame;
 	// ======================================================================
 
-	bool minimized = false;
+	std::set<uint32_t> Renderer::freeIndices = {};
+	std::vector<RenderObject> Renderer::renderObjects = {};
 
-	std::vector<std::weak_ptr<RenderObject>> Renderer::renderObjects{};
-	std::unique_ptr<Shader> shader;
 	Vulkan::RenderPass* renderPass;
 
 	void Renderer::Init(const Window* window)
@@ -32,15 +33,14 @@ namespace Prism {
 		Vulkan::Context::Init(window);
 
 		g_Frame.frames = new Vulkan::Frame[FRAME_COUNT];
-		shader = std::make_unique<Shader>("assets/shader/shader.glsl");
 
 		renderPass = &Vulkan::RenderPass::GetDefaultPass();
-
-		renderPass->SetClearValue(vk::ClearColorValue(std::array<float, 4>({0.2f, 0.2f, 0.2f, 1.0f})));
+		renderPass->SetClearValue(vk::ClearColorValue(std::array<float, 4>({ 0.2f, 0.2f, 0.2f, 1.0f })));
 	}
 
 	void Renderer::Shutdown()
 	{
+		renderObjects.clear();
 		ShaderLibrary::CleanUp();
 
 		delete[] g_Frame.frames;
@@ -55,7 +55,7 @@ namespace Prism {
 
 	void Renderer::Render()
 	{
-		if (!minimized)
+		for (const auto& object : renderObjects)
 		{
 			g_Frame.get().Begin();
 			renderPass->Begin(
@@ -63,25 +63,47 @@ namespace Prism {
 				g_Frame.get().GetFramebuffer(),
 				vk::SubpassContents::eInline);
 
-			ShaderLibrary::PipelineOf(*shader.get())->Bind(g_Frame.get().GetCommandBuffer());
+			ShaderLibrary::PipelineOf(object.material.shader)->Bind(g_Frame.get().GetCommandBuffer());
 			g_Frame.get().GetCommandBuffer().draw(3, 1, 0, 0);
 
 			renderPass->End(g_Frame.get().GetCommandBuffer());
 			g_Frame.get().End();
 		}
-		else
-		{
-			PR_CORE_WARN("Rendering paused");
-		}
-	}
-
-	void Renderer::Register(const std::shared_ptr<RenderObject>& renderObject)
-	{
-		renderObjects.emplace_back(renderObject);
 	}
 
 	void Renderer::Resize(uint32_t width, uint32_t height)
 	{
 		Vulkan::Context::Resize(width, height);
+	}
+
+	RenderObjectHandle Renderer::Register(const RenderComponent& component)
+	{
+		RenderObjectHandle index;
+
+		if (freeIndices.empty())
+		{
+			// construct new RenderObject at back of the vector
+			index = renderObjects.size();
+			renderObjects.emplace_back(component.mesh, *component.material.get());
+		}
+		else
+		{
+			// replace mesh & material of the first unused RenderObject
+			index = *freeIndices.begin();
+			freeIndices.erase(freeIndices.begin());
+
+			renderObjects[index].mesh = component.mesh;
+			renderObjects[index].material = *component.material.get();
+		}
+
+		return index;
+	}
+
+	void Renderer::Unregister(RenderObjectHandle index)
+	{
+		freeIndices.insert(index);
+
+		renderObjects[index].mesh = nullptr;
+		renderObjects[index].material.~Material();
 	}
 }

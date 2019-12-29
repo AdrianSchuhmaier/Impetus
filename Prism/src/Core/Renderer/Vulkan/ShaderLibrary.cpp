@@ -11,14 +11,16 @@
 
 namespace Prism {
 	using namespace Vulkan;
-	
+
 	// forward declarations
 	std::optional<Shader::Code> readFile(const std::string& file);
 	std::optional<Shader::SpirV> compile(const Shader::Code& code, const char* name = "shader");
+	Vulkan::VertexBufferDescriptor generateVulkanDescriptor(const VertexInputDescription& genericDescriptor);
+	vk::Format generateVulkanDataType(const BufferDataType& dataType);
 
 	std::unordered_map<std::string, std::unique_ptr<Pipeline>> ShaderLibrary::s_Pipelines;
 
-	bool ShaderLibrary::Load(const std::string& file)
+	bool ShaderLibrary::Load(const std::string& file, const VertexInputDescription& inputDescription)
 	{
 		auto it = s_Pipelines.find(file);
 		if (it != s_Pipelines.end())
@@ -42,7 +44,7 @@ namespace Prism {
 			PR_CORE_ASSERT(spv.has_value(), "Unable to compile shader '{0}'", name);
 
 			// create pipeline
-			s_Pipelines[file] = std::make_unique<Pipeline>(spv.value());
+			s_Pipelines[file] = std::make_unique<Pipeline>(spv.value(), generateVulkanDescriptor(inputDescription));
 			s_Pipelines[file]->Create(RenderPass::GetDefaultPass().GetHandle());
 
 			return true;
@@ -138,4 +140,42 @@ namespace Prism {
 		PR_CORE_TRACE("Shader '{0}' compiled", name);
 		return result;
 	}
+
+	Vulkan::VertexBufferDescriptor generateVulkanDescriptor(const VertexInputDescription& genericDescriptor)
+	{
+		Vulkan::VertexBufferDescriptor result;
+
+		constexpr uint32_t binding = 0;
+		result.bindingDescription = vk::VertexInputBindingDescription(binding, genericDescriptor.stride);
+
+		uint32_t attribCount = genericDescriptor.attributes.size();
+		result.attributeDescriptions.resize(attribCount);
+
+		for (uint32_t i = 0; i < attribCount; ++i)
+		{
+			result.attributeDescriptions[i] = vk::VertexInputAttributeDescription(i,
+				binding,
+				generateVulkanDataType(genericDescriptor.attributes[i].type),
+				genericDescriptor.attributes[i].offset);
+		}
+		return result;
+	}
+
+	vk::Format generateVulkanDataType(const BufferDataType& dataType)
+	{
+		switch (dataType)
+		{
+		case BufferDataType::Float:    return vk::Format::eR32Sfloat;
+		case BufferDataType::Float2:   return vk::Format::eR32G32Sfloat;
+		case BufferDataType::Float3:   return vk::Format::eR32G32B32Sfloat;
+		case BufferDataType::Float4:   return vk::Format::eR32G32B32A32Sfloat;
+		case BufferDataType::Int:      return vk::Format::eR32Sint;
+		case BufferDataType::Int2:     return vk::Format::eR32G32Sint;
+		case BufferDataType::Int3:     return vk::Format::eR32G32B32Sint;
+		case BufferDataType::Int4:     return vk::Format::eR32G32B32A32Sint;
+		default:
+			PR_CORE_ASSERT(false, "Cannot determine Vulkan Format for BufferDatatype");
+		}
+	}
+
 }

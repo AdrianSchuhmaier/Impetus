@@ -1,6 +1,10 @@
 #pragma once
 
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+#include <glm/glm.hpp>
 #include "Core/Application.h"
+#include "Core/Renderer/Renderer.h"
+#include "Components/RenderComponent.h"
 #include "Log/Log.h"
 
 // Entry point - must be defined (return Application*) instead of a main method

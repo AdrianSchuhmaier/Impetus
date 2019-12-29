@@ -6,7 +6,8 @@ namespace Prism {
 	class Application
 	{
 	public:
-		Application();
+		Application(const Window::Properties& props =
+			{ "Prism Engine", 1024, 720, false, true });
 		virtual ~Application();
 
 		void Run();

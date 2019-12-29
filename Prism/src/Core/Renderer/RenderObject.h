@@ -1,13 +1,20 @@
 #pragma once
 
-namespace Prism {
-	class RenderObject
-	{
-	public:
+#include "Material.h"
+#include "Mesh.h"
 
-	private:
-		// Mesh
+namespace Prism {
+
+	using RenderObjectHandle = uint32_t;
+
+	struct RenderObject
+	{
+		std::shared_ptr<Mesh> mesh;
 		// Texture
-		// Shader
+		Material material;
+
+		RenderObject(const std::shared_ptr<Mesh>& mesh, Material material)
+			: mesh(mesh)
+			, material(material){}
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BufferUtil.h"
 #include <string>
 
 namespace Prism {
@@ -15,7 +16,8 @@ namespace Prism {
 		using Code = std::unordered_map<Shader::Type, std::string>;
 		using SpirV = std::unordered_map<Shader::Type, std::vector<uint32_t>>;
 
-		Shader(const std::string& file);
+		Shader() = default;
+		Shader(const std::string& file, const VertexInputDescription& inputDescription);
 		~Shader();
 	};
 }

@@ -5,20 +5,18 @@
 
 namespace Prism::Vulkan {
 
-	namespace VertexBuffer {
-		struct Descriptor
-		{
-			vk::VertexInputBindingDescription bindingDescription;
-			std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-		};
-	}
+	struct VertexBufferDescriptor
+	{
+		vk::VertexInputBindingDescription bindingDescription;
+		std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
+	};
 
 	class Pipeline
 	{
 	public:
 		Pipeline(
 			const Shader::SpirV& code,
-			const VertexBuffer::Descriptor& descriptor = {}, // TODO: remove
+			const VertexBufferDescriptor& descriptor = {}, // TODO: remove
 			const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts = {},
 			const std::vector<vk::PushConstantRange>& pushConstants = {});
 
@@ -35,7 +33,7 @@ namespace Prism::Vulkan {
 			const std::vector<vk::PushConstantRange>& pushConstants);
 
 		void SetShaders(const Shader::SpirV& spv);
-		
+
 
 		struct ColorBlend { vk::BlendFactor src, dst; vk::BlendOp op; };
 		void SetColorBlend(const ColorBlend& color, const ColorBlend& alpha);

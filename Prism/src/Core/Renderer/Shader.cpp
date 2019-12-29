@@ -4,9 +4,9 @@
 #include "Vulkan/ShaderLibrary.h"
 
 namespace Prism {
-	Shader::Shader(const std::string& file) : std::string(file)
+	Shader::Shader(const std::string& file, const VertexInputDescription& inputDescription) : std::string(file)
 	{
-		ShaderLibrary::Load(file);		
+		ShaderLibrary::Load(file, inputDescription);
 	}
 
 	Shader::~Shader()

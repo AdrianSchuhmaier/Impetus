@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include "../BufferUtil.h"
 #include "Pipeline.h"
 
 namespace Prism {
@@ -9,13 +10,14 @@ namespace Prism {
 	class ShaderLibrary
 	{
 	public:
-		static bool Load(const std::string& file);
+		static bool Load(const std::string& file, const VertexInputDescription& inputDescription);
 		static void Remove(const std::string& file);
 
 		static void CleanUp() { s_Pipelines.clear(); };
 
 		static Vulkan::Pipeline* PipelineOf(const std::string& file)
 		{
+			auto s = s_Pipelines.size();
 			auto it = s_Pipelines.find(file);
 			if (it != s_Pipelines.end())
 				return it->second.get();

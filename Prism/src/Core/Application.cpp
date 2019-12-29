@@ -4,16 +4,15 @@
 
 namespace Prism {
 
-	Application::Application()
+	Application::Application(const Window::Properties& props)
 	{
-		m_Window = Window::Create({ "Fullscreen", 1920, 1080, true, false });
+		m_Window = Window::Create(props);
 		m_Window->SetEventCallback(PR_BIND_EVENT_FN(Application::EventCallback));
 
 		Renderer::Init(m_Window.get());
 		PR_CORE_TRACE("Application created.");
 
 		m_LastFrameTime = GetTime();
-		LimitFPS(120);
 	}
 
 	void Application::Run()
