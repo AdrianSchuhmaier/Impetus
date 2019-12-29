@@ -20,7 +20,9 @@ namespace Prism {
 		RenderComponent(
 			const std::string& shaderFile,
 			const Prism::VertexBuffer::Layout& input,
-			uint64_t vertexCount,
-			float* vertexData);
+			uint32_t vertexCount,
+			float* vertices,
+			uint32_t indexCount,
+			uint32_t* indices);
 	};
 }

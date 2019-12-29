@@ -21,9 +21,14 @@ struct Game : public Prism::Application
 			&Vertex::color);
 
 		const std::vector<Vertex> vertices = {
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+		};
+		
+		const std::vector<uint32_t> indices = {
+			0, 1, 2, 2, 3, 0
 		};
 
 		// construct demo object
@@ -31,7 +36,9 @@ struct Game : public Prism::Application
 			"assets/shader/shader.glsl",
 			inputDescription,
 			vertices.size(),
-			(float*)vertices.data());
+			(float*)vertices.data(),
+			indices.size(),
+			(uint32_t*)indices.data());
 
 		Prism::Renderer::Register(*renderObject);
 	}

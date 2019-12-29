@@ -86,12 +86,16 @@ namespace Prism {
 	void drawMesh(Mesh* mesh)
 	{
 		const auto& vb = static_cast<Vulkan::VertexBuffer*>(mesh->vertexBuffer.get());
+		const auto& ib = static_cast<Vulkan::IndexBuffer*>(mesh->indexBuffer.get());
 
 		vk::Buffer vertexBuffers[] = { vb->GetBuffer().bufferHandle };
 		vk::DeviceSize offsets[] = { 0 };
 		currentFrame().GetCommandBuffer().bindVertexBuffers(0, 1, vertexBuffers, offsets);
 
-		currentFrame().GetCommandBuffer().draw(mesh->vertexCount, 1, 0, 0);
+		currentFrame().GetCommandBuffer().bindIndexBuffer(
+			ib->GetBuffer().bufferHandle, 0, vk::IndexType::eUint32);
+
+		currentFrame().GetCommandBuffer().drawIndexed(mesh->vertexCount, 1, 0, 0, 0);
 	}
 
 

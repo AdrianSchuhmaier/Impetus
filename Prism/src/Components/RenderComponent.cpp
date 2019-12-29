@@ -7,16 +7,21 @@ namespace Prism {
 	RenderComponent::RenderComponent(
 		const std::string& shaderFile,
 		const VertexBuffer::Layout& inputDescription,
-		uint64_t vertexCount,
-		float* vertexData
+		uint32_t vertexCount,
+		float* vertices,
+		uint32_t indexCount,
+		uint32_t* indices
 	)
 		: material(std::make_shared<Material>(shaderFile, inputDescription))
 		, mesh(std::make_shared<Mesh>())
 	{
-		mesh->vertexCount = vertexCount;
+		mesh->vertexCount = indexCount;
 		mesh->vertexBuffer = VertexBuffer::Create(
 			inputDescription,
-			vertexCount * inputDescription.stride,
-			vertexData);
+			(size_t)vertexCount * inputDescription.stride,
+			vertices);
+		mesh->indexBuffer = IndexBuffer::Create(
+			indexCount * sizeof(uint32_t),
+			indices);
 	}
 }
