@@ -1,22 +1,17 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "../Shader.h"
+#include "../Material.h"
+#include "Buffer.h"
 
 namespace Prism::Vulkan {
-
-	struct VertexBufferDescriptor
-	{
-		vk::VertexInputBindingDescription bindingDescription;
-		std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-	};
 
 	class Pipeline
 	{
 	public:
 		Pipeline(
-			const Shader::SpirV& code,
-			const VertexBufferDescriptor& descriptor = {}, // TODO: remove
+			const ShaderBinary& code,
+			const VertexBuffer::Descriptor& descriptor = {}, // TODO: remove
 			const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts = {},
 			const std::vector<vk::PushConstantRange>& pushConstants = {});
 
@@ -32,7 +27,7 @@ namespace Prism::Vulkan {
 			const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts,
 			const std::vector<vk::PushConstantRange>& pushConstants);
 
-		void SetShaders(const Shader::SpirV& spv);
+		void SetShaders(const ShaderBinary& spv);
 
 
 		struct ColorBlend { vk::BlendFactor src, dst; vk::BlendOp op; };
@@ -78,6 +73,6 @@ namespace Prism::Vulkan {
 			vk::UniqueShaderModule module;
 			vk::PipelineShaderStageCreateInfo info;
 		};
-		std::unordered_map<Shader::Type, ShaderModule> m_ShaderModules;
+		std::unordered_map<ShaderType, ShaderModule> m_ShaderModules;
 	};
 }

@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "../BufferUtil.h"
+#include "../Buffer.h"
 #include "Pipeline.h"
 
 namespace Prism {
@@ -10,7 +10,7 @@ namespace Prism {
 	class ShaderLibrary
 	{
 	public:
-		static bool Load(const std::string& file, const VertexInputDescription& inputDescription);
+		static bool Load(const std::string& file, const Prism::VertexBuffer::Layout& inputDescription);
 		static void Remove(const std::string& file);
 
 		static void CleanUp() { s_Pipelines.clear(); };

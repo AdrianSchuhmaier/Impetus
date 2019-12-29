@@ -6,8 +6,8 @@
 namespace Prism::Vulkan {
 
 	Pipeline::Pipeline(
-		const Shader::SpirV& code,
-		const VertexBufferDescriptor& descriptor,
+		const ShaderBinary& code,
+		const VertexBuffer::Descriptor& descriptor,
 		const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts,
 		const std::vector<vk::PushConstantRange>& pushConstants)
 	{
@@ -46,9 +46,9 @@ namespace Prism::Vulkan {
 	}
 
 	// defined below
-	vk::ShaderStageFlagBits toVulkanStageFlag(const Shader::Type& type);
+	vk::ShaderStageFlagBits toVulkanStageFlag(const ShaderType& type);
 
-	void Pipeline::SetShaders(const Shader::SpirV& spv)
+	void Pipeline::SetShaders(const ShaderBinary& spv)
 	{
 		m_ShaderModules.clear();
 		for (const auto& shader : spv)
@@ -109,16 +109,16 @@ namespace Prism::Vulkan {
 			stages.reserve(5);
 
 			// vertex + fragment shader must be there
-			stages.emplace_back(m_ShaderModules.at(Shader::Type::Vertex).info);
-			stages.emplace_back(m_ShaderModules.at(Shader::Type::Fragment).info);
+			stages.emplace_back(m_ShaderModules.at(ShaderType::Vertex).info);
+			stages.emplace_back(m_ShaderModules.at(ShaderType::Fragment).info);
 
 			// add other shaders (if found)
-			if (m_ShaderModules.find(Shader::Type::Geometry) != m_ShaderModules.end())
-				stages.emplace_back(m_ShaderModules.at(Shader::Type::Geometry).info);
-			if (m_ShaderModules.find(Shader::Type::TesselationControl) != m_ShaderModules.end())
-				stages.emplace_back(m_ShaderModules.at(Shader::Type::TesselationControl).info);
-			if (m_ShaderModules.find(Shader::Type::TesselationEvaluation) != m_ShaderModules.end())
-				stages.emplace_back(m_ShaderModules.at(Shader::Type::TesselationEvaluation).info);
+			if (m_ShaderModules.find(ShaderType::Geometry) != m_ShaderModules.end())
+				stages.emplace_back(m_ShaderModules.at(ShaderType::Geometry).info);
+			if (m_ShaderModules.find(ShaderType::TesselationControl) != m_ShaderModules.end())
+				stages.emplace_back(m_ShaderModules.at(ShaderType::TesselationControl).info);
+			if (m_ShaderModules.find(ShaderType::TesselationEvaluation) != m_ShaderModules.end())
+				stages.emplace_back(m_ShaderModules.at(ShaderType::TesselationEvaluation).info);
 
 			vk::Viewport viewport(0.0f, 0.0f, Context::GetSwapchain().extent.width,
 				Context::GetSwapchain().extent.height, 0.0f, 1.0f);
@@ -177,21 +177,21 @@ namespace Prism::Vulkan {
 		cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipelines[m_Current].get());
 	}
 
-	vk::ShaderStageFlagBits toVulkanStageFlag(const Shader::Type& type)
+	vk::ShaderStageFlagBits toVulkanStageFlag(const ShaderType& type)
 	{
 		switch (type)
 		{
-		case Shader::Type::Vertex:
+		case ShaderType::Vertex:
 			return vk::ShaderStageFlagBits::eVertex;
-		case Shader::Type::Fragment:
+		case ShaderType::Fragment:
 			return vk::ShaderStageFlagBits::eFragment;
-		case Shader::Type::Geometry:
+		case ShaderType::Geometry:
 			return vk::ShaderStageFlagBits::eGeometry;
-		case Shader::Type::Compute:
+		case ShaderType::Compute:
 			return vk::ShaderStageFlagBits::eCompute;
-		case Shader::Type::TesselationControl:
+		case ShaderType::TesselationControl:
 			return vk::ShaderStageFlagBits::eTessellationControl;
-		case Shader::Type::TesselationEvaluation:
+		case ShaderType::TesselationEvaluation:
 			return vk::ShaderStageFlagBits::eTessellationEvaluation;
 		default:
 			return vk::ShaderStageFlagBits::eAllGraphics;

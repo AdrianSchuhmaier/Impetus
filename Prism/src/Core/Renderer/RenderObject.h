@@ -13,7 +13,7 @@ namespace Prism {
 		// Texture
 		Material material;
 
-		RenderObject(const std::shared_ptr<Mesh>& mesh, Material material)
+		RenderObject(const std::shared_ptr<Mesh>& mesh, const Material& material)
 			: mesh(mesh)
 			, material(material){}
 	};

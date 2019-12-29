@@ -7,7 +7,7 @@ namespace Prism {
 
 	Material::Material(
 		const std::string& file,
-		const VertexInputDescription& inputDescription
+		const VertexBuffer::Layout& inputDescription
 	) : shader(file)
 	{
 		ShaderLibrary::Load(shader, inputDescription);

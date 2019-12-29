@@ -1,14 +1,13 @@
 #pragma once
 
-#include "BufferUtil.h"
+#include "Buffer.h"
 
 namespace Prism {
 
-	class Mesh
+	struct Mesh
 	{
-	public:
-
-	private:
-
+		std::unique_ptr<VertexBuffer> vertexBuffer = nullptr;
+		std::unique_ptr<IndexBuffer> indexBuffer = nullptr;
+		uint32_t vertexCount = 0;
 	};
 }

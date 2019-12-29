@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Window/Window.h"
-#include "Core/Renderer/BufferUtil.h"
+#include "Core/Renderer/Buffer.h"
 
 #include "Components/RenderComponent.h"
 

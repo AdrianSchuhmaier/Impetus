@@ -9,21 +9,31 @@ struct Game : public Prism::Application
 	{
 		LimitFPS(240);
 
-		struct Test
+		struct Vertex
 		{
 			glm::vec2 pos;
 			glm::vec3 color;
 		};
 
-		auto inputDescription = Prism::VertexInputDescription::Generate
-			<Test>(
-				&Test::pos,
-				&Test::color);
+		auto inputDescription = Prism::VertexBuffer::Layout::Generate
+			<Vertex>(
+			&Vertex::pos,
+			&Vertex::color);
 
-		Prism::RenderAsset asset{ "assets/shader/shader.glsl", inputDescription };
+		const std::vector<Vertex> vertices = {
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
 
 		// construct demo object
-		renderObject = std::make_shared<Prism::RenderComponent>(asset);
+		renderObject = std::make_shared<Prism::RenderComponent>(
+			"assets/shader/shader.glsl",
+			inputDescription,
+			vertices.size(),
+			(float*)vertices.data());
+
+		Prism::Renderer::Register(*renderObject);
 	}
 
 	void OnEvent(Prism::Event& e) override {

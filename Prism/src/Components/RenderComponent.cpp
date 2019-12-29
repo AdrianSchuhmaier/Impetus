@@ -4,14 +4,19 @@
 #include "Core/Renderer/Renderer.h"
 
 namespace Prism {
-	RenderComponent::RenderComponent(const RenderAsset& asset)
-		: material(std::make_shared<Material>(asset.shaderFile, asset.vertexInputDescription))
+	RenderComponent::RenderComponent(
+		const std::string& shaderFile,
+		const VertexBuffer::Layout& inputDescription,
+		uint64_t vertexCount,
+		float* vertexData
+	)
+		: material(std::make_shared<Material>(shaderFile, inputDescription))
+		, mesh(std::make_shared<Mesh>())
 	{
-		renderObject = Renderer::Register(*this);
-	}
-
-	RenderComponent::~RenderComponent()
-	{
-		Renderer::Unregister(renderObject);
+		mesh->vertexCount = vertexCount;
+		mesh->vertexBuffer = VertexBuffer::Create(
+			inputDescription,
+			vertexCount * inputDescription.stride,
+			vertexData);
 	}
 }
