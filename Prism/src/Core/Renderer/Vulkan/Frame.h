@@ -2,6 +2,7 @@
 
 #include "vulkan/vulkan.hpp"
 #include "CommandPool.h"
+#include "DescriptorPool.h"
 
 namespace Prism::Vulkan {
 	class Frame

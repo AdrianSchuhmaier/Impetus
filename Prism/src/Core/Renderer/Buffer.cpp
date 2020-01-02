@@ -13,4 +13,9 @@ namespace Prism {
 	{
 		return std::make_unique<Vulkan::IndexBuffer>(size, data);
 	}
+
+	std::unique_ptr<UniformBuffer> UniformBuffer::Create(size_t size)
+	{
+		return std::make_unique<Vulkan::UniformBuffer>(size);
+	}
 }

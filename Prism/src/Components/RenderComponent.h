@@ -4,25 +4,19 @@
 #include "Core/Renderer/Mesh.h"
 #include "Core/Renderer/Material.h"
 
-#include "Core/Renderer/RenderObject.h"
-
 namespace Prism {
 
 	struct RenderComponent : public Component
 	{
-		bool visible = true;
 		std::shared_ptr<Mesh> mesh = nullptr;
 		std::shared_ptr<Material> material = nullptr;
-
-		RenderObjectHandle renderObject;
 
 		RenderComponent() = default;
 		RenderComponent(
 			const std::string& shaderFile,
-			const Prism::VertexBuffer::Layout& input,
+			const VertexBuffer::Layout& inputDescription,
 			uint32_t vertexCount,
-			float* vertices,
-			uint32_t indexCount,
-			uint32_t* indices);
+			std::unique_ptr<VertexBuffer>&& vb,
+			std::unique_ptr<IndexBuffer>&& ib);
 	};
 }

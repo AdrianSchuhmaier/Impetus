@@ -26,6 +26,16 @@ namespace Prism::Vulkan {
 		}
 	}
 
+	UniformBuffer::UniformBuffer(uint32_t size) : m_Size(size)
+	{
+		m_Buffer = MemoryManager::CreateBuffer(size, BufferType::UniformBuffer, BufferAccessPattern::GPU_dynamic);
+	}
+
+	void UniformBuffer::UpdateNow(void* data)
+	{
+		MemoryManager::BufferData(m_Size, data, *m_Buffer);
+	}
+
 	VertexBuffer::VertexBuffer(const Prism::VertexBuffer::Layout& layout, uint32_t size, float* data)
 	{
 		m_Descriptor = GetVulkanDescriptor(layout);

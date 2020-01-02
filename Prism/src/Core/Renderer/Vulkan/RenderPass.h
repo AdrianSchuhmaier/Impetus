@@ -36,16 +36,8 @@ namespace Prism::Vulkan {
 		void SetClearValue(vk::ClearValue clearValue) { m_ClearValue = clearValue; }
 		vk::RenderPass GetHandle() const { return m_RenderPass.get(); }
 
-		static RenderPass& GetDefaultPass();
-
-		static void CleanUpStatic() {
-			delete s_DefaultPass;
-		}
-
 	private:
 		vk::UniqueRenderPass m_RenderPass;
 		vk::ClearValue m_ClearValue;
-
-		static RenderPass* s_DefaultPass;
 	};
 }

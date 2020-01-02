@@ -2,6 +2,8 @@
 #include "Swapchain.h"
 #include "RenderPass.h"
 
+#include "Core/Renderer/Defaults/VulkanDefaults.h"
+
 namespace Prism::Vulkan {
 	// forward declarations
 	vk::PresentModeKHR chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes);
@@ -70,7 +72,7 @@ namespace Prism::Vulkan {
 		PR_CORE_ASSERT(framebuffers.size() < 1, "There should be no Framebuffers at this point");
 
 		if (rp.has_value()) renderPass = rp;
-		else if (!renderPass.has_value()) renderPass = RenderPass::GetDefaultPass().GetHandle();
+		else if (!renderPass.has_value()) renderPass = Defaults::GetDefaultRenderPass()->GetHandle();
 
 		framebuffers.reserve(imageViews.size());
 		for (int i = 0; i < imageViews.size(); i++)

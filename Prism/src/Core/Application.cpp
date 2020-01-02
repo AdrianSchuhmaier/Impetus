@@ -4,10 +4,15 @@
 
 namespace Prism {
 
+	World* Application::world = nullptr;
+
 	Application::Application(const Window::Properties& props)
 	{
-		m_Window = Window::Create(props);
+		m_Window = std::make_unique<Window>(props);
 		m_Window->SetEventCallback(PR_BIND_EVENT_FN(Application::EventCallback));
+		// start the Entity Component System
+		world = new World();
+
 
 		Renderer::Init(m_Window.get());
 		PR_CORE_TRACE("Application created.");
@@ -22,6 +27,8 @@ namespace Prism {
 			auto dt = GetDeltaTime();
 
 			m_Window->OnUpdate();
+			
+			/*clientApp->*/OnUpdate(dt);
 
 			if (dt >= m_MinFrameDuration && !m_Minimized)
 			{
@@ -35,29 +42,30 @@ namespace Prism {
 	void Application::EventCallback(Event& event)
 	{
 		event.Handle<WindowCloseEvent>([&](WindowCloseEvent& e)
-		{
-			PR_CORE_TRACE("WindowClose handled by Application");
-			m_Running = false;
-			return true;
-		});
+			{
+				PR_CORE_TRACE("WindowClose handled by Application");
+				m_Running = false;
+				return true;
+			});
 
 		event.Handle<WindowResizeEvent>([&](WindowResizeEvent& e)
-		{
-			if (e.GetWidth() <= 0 || e.GetHeight() <= 0)
 			{
-				m_Minimized = true;
+				if (e.GetWidth() <= 0 || e.GetHeight() <= 0)
+				{
+					m_Minimized = true;
+					return true;
+				}
+				Renderer::Resize(e.GetWidth(), e.GetHeight());
+				m_Minimized = false;
 				return true;
-			}
-			Renderer::Resize(e.GetWidth(), e.GetHeight());
-			m_Minimized = false;
-			return true;
-		});
+			});
 		// Unhandled events: invoke OnEvent on the client application
-		if (!event.handled) OnEvent(event);
+		if (!event.handled) /*clientApp->*/OnEvent(event);
 	}
 
 	Application::~Application()
 	{
+		delete world;
 		Renderer::Shutdown();
 		PR_CORE_TRACE("Application destroyed.");
 	}

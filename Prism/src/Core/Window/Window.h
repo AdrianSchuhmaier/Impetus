@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Event.h"
+#include "Log/Log.h"
 
 namespace Prism {
 	class Window
@@ -22,16 +23,16 @@ namespace Prism {
 		struct WindowData
 		{
 			Properties& properties;
-			EventCallbackFn callback;
+			EventCallbackFn callback = [](Event&) {
+				PR_CORE_WARN("No window callback set");
+			};
 		};
 
 		void SetGLFWCallbacks();
 
 
 	public:
-		static std::unique_ptr<Window> Create(Properties = Properties());
-
-		Window(Properties&);
+		Window(const Properties&);
 		~Window();
 
 		void OnUpdate();

@@ -20,6 +20,7 @@ namespace Prism {
 
 		// TODO: properties
 
+		Material() = default;
 		Material(const std::string& file, const VertexBuffer::Layout& inputDescription);
 		~Material();
 	};

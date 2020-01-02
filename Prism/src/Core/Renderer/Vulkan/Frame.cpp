@@ -2,6 +2,7 @@
 #include "Frame.h"
 
 #include "Context.h"
+#include "Core/Renderer/Defaults/VulkanDefaults.h"
 
 namespace Prism::Vulkan {
 

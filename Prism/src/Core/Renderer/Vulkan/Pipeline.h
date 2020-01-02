@@ -11,7 +11,7 @@ namespace Prism::Vulkan {
 	public:
 		Pipeline(
 			const ShaderBinary& code,
-			const VertexBuffer::Descriptor& descriptor = {}, // TODO: remove
+			const VertexBuffer::Descriptor& descriptor,
 			const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts = {},
 			const std::vector<vk::PushConstantRange>& pushConstants = {});
 
@@ -47,6 +47,8 @@ namespace Prism::Vulkan {
 		void Create(vk::RenderPass renderPass, uint32_t subpassIndex = 0);
 
 		void Bind(vk::CommandBuffer cmd);
+
+		vk::PipelineLayout GetLayout() const { return m_Layout.get(); }
 
 	private:
 		std::atomic<bool> m_Empty = true;

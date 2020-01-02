@@ -3,11 +3,14 @@
 #include "Core/Window/Window.h"
 #include "Core/Renderer/Buffer.h"
 
+#include "Entity.h"
 #include "Components/RenderComponent.h"
+#include "Components/TransformComponent.h"
 
-#include <set>
+#include <unordered_set>
 
 namespace Prism {
+
 	class Renderer
 	{
 	public:
@@ -19,11 +22,8 @@ namespace Prism {
 
 		static void Resize(uint32_t width, uint32_t height);
 
-		static RenderObjectHandle Register(const RenderComponent& component);
-		static void Unregister(RenderObjectHandle component);
-
-		// TODO: change datastructure
-		static std::set<uint32_t> freeIndices;
-		static std::vector<RenderObject> renderObjects;
+		// Handle
+		static void Register(EntityID entity);
+		//static void Unregister(RenderObjectHandle renderObject);
 	};
 }

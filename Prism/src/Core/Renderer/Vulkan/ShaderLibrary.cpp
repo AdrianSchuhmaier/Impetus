@@ -5,6 +5,8 @@
 #include "RenderPass.h"
 #include "Buffer.h"
 
+#include "Core/Renderer/Defaults/VulkanDefaults.h"
+
 #include <shaderc/shaderc.hpp>
 #include <fstream>
 #include <sstream>
@@ -44,9 +46,10 @@ namespace Prism {
 
 			// create pipeline
 			s_Pipelines[file] = std::make_unique<Pipeline>(
-				spv.value(), Vulkan::VertexBuffer::GetVulkanDescriptor(inputDescription));
+				spv.value(), Vulkan::VertexBuffer::GetVulkanDescriptor(inputDescription),
+				std::vector<vk::DescriptorSetLayout>({ Defaults::GetDefaultUniformBufferDescriptor() }));
 
-			s_Pipelines[file]->Create(RenderPass::GetDefaultPass().GetHandle());
+			s_Pipelines[file]->Create(Defaults::GetDefaultRenderPass()->GetHandle());
 
 			return true;
 		}

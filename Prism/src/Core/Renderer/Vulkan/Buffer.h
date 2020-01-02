@@ -27,11 +27,26 @@ namespace Prism::Vulkan {
 	{
 		VkBuffer bufferHandle;
 		VmaAllocation allocation;
+		BufferAccessPattern access;
 
-		Buffer(VkBuffer bufferHandle, VmaAllocation allocation)
-			: bufferHandle(bufferHandle), allocation(allocation) {}
+		Buffer(VkBuffer bufferHandle, VmaAllocation allocation, BufferAccessPattern access)
+			: bufferHandle(bufferHandle), allocation(allocation), access(access) {}
 
 		~Buffer();
+	};
+
+	class UniformBuffer : public Prism::UniformBuffer
+	{
+	public:
+		UniformBuffer(uint32_t size);
+		const Buffer& GetBuffer() const { return *m_Buffer; };
+		uint32_t GetSize() const { return m_Size; }
+
+		void UpdateNow(void* data);
+
+	private:
+		uint32_t m_Size;
+		std::unique_ptr<Buffer> m_Buffer;
 	};
 
 	class VertexBuffer : public Prism::VertexBuffer
@@ -59,7 +74,6 @@ namespace Prism::Vulkan {
 	{
 	public:
 		IndexBuffer(uint32_t size, uint32_t* data);
-
 		const Buffer& GetBuffer() const { return *m_Buffer; };
 
 	private:

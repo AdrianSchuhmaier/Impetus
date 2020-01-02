@@ -128,7 +128,7 @@ namespace Prism::Vulkan {
 				1, &viewport, 1, &scissor);
 
 			vk::GraphicsPipelineCreateInfo pipelineCreateInfo({},
-				stages.size(), stages.data(),
+				(uint32_t)stages.size(), stages.data(),
 				&m_VertexInputCreateInfo,
 				&m_InputAssemblyCreateInfo,
 				nullptr, // tesselation

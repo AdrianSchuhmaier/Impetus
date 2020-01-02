@@ -13,7 +13,9 @@ namespace Prism {
 		PR_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
 	}
 
-	std::unique_ptr<Window> Window::Create(Properties props)
+	Window::Window(const Properties& props)
+		: m_Properties{ props }
+		, m_WindowData{ m_Properties }
 	{
 		if (!s_Initialized)
 		{
@@ -22,36 +24,24 @@ namespace Prism {
 		}
 
 		PR_CORE_ASSERT(s_Initialized, "Window initialization failed!");
-		
+
 		GLFWmonitor* monitor = nullptr;
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, props.resizable);
-		
-		if (props.fullscreen)
-		{			
+		glfwWindowHint(GLFW_RESIZABLE, m_Properties.resizable);
+
+		if (m_Properties.fullscreen)
+		{
 			monitor = glfwGetPrimaryMonitor();
 			auto mode = glfwGetVideoMode(monitor);
-			props.width = mode->width;
-			props.height = mode->height;
+			m_Properties.width = mode->width;
+			m_Properties.height = mode->height;
 		}
 
-		auto window = std::make_unique<Window>(props);
-		window->m_WindowHandle = glfwCreateWindow(props.width, props.height,
-			props.title.c_str(), monitor, nullptr);
+		m_WindowHandle = glfwCreateWindow(m_Properties.width, m_Properties.height,
+			m_Properties.title.c_str(), monitor, nullptr);
 
-		window->SetGLFWCallbacks();
-
-		return window;
-	}
-
-	Window::Window(Properties& props)
-		: m_Properties{ props }
-		, m_WindowData{ props }
-	{
-		m_WindowData.callback = [](Event& e) {
-			PR_CORE_WARN("Cannot invoke callback for window - no callback set!");
-		};
+		SetGLFWCallbacks();
 	}
 
 	Window::~Window()

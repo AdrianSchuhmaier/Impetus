@@ -5,6 +5,8 @@
 #include "Core/Application.h"
 #include "Core/Renderer/Renderer.h"
 #include "Components/RenderComponent.h"
+#include "Components/TransformComponent.h"
+#include "Entity.h"
 #include "Log/Log.h"
 
 // Entry point - must be defined (return Application*) instead of a main method

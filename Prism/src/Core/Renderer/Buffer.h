@@ -8,10 +8,16 @@ namespace Prism {
 		Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
 	};
 
+	struct UniformBuffer
+	{
+		virtual ~UniformBuffer() = default;
+		static std::unique_ptr<UniformBuffer> Create(size_t size);
+	};
+
 	struct IndexBuffer
 	{
 		virtual ~IndexBuffer() = default;
-		static std::unique_ptr<IndexBuffer> Create(size_t, uint32_t* data);
+		static std::unique_ptr<IndexBuffer> Create(size_t size, uint32_t* data);
 	};
 
 	struct VertexBuffer

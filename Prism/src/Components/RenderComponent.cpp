@@ -8,20 +8,14 @@ namespace Prism {
 		const std::string& shaderFile,
 		const VertexBuffer::Layout& inputDescription,
 		uint32_t vertexCount,
-		float* vertices,
-		uint32_t indexCount,
-		uint32_t* indices
+		std::unique_ptr<VertexBuffer>&& vb,
+		std::unique_ptr<IndexBuffer>&& ib
 	)
 		: material(std::make_shared<Material>(shaderFile, inputDescription))
 		, mesh(std::make_shared<Mesh>())
 	{
-		mesh->vertexCount = indexCount;
-		mesh->vertexBuffer = VertexBuffer::Create(
-			inputDescription,
-			(size_t)vertexCount * inputDescription.stride,
-			vertices);
-		mesh->indexBuffer = IndexBuffer::Create(
-			indexCount * sizeof(uint32_t),
-			indices);
+		mesh->vertexCount = vertexCount;
+		mesh->vertexBuffer = std::move(vb);
+		mesh->indexBuffer = std::move(ib);
 	}
 }
