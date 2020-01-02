@@ -66,4 +66,9 @@ namespace Prism::Vulkan {
 
 		return s_DefaultUniformBufferDescriptor;
 	}
+
+	vk::PushConstantRange Defaults::GetDefaultPushConstantRange()
+	{
+		return vk::PushConstantRange(vk::ShaderStageFlagBits::eVertex, 0, sizeof(glm::mat4));
+	}
 }

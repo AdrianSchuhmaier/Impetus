@@ -8,7 +8,9 @@
 #include "Vulkan/ShaderLibrary.h"
 #include "Vulkan/MemoryManager.h"
 
+#include "Components/CameraComponent.h"
 #include "Components/RenderComponent.h"
+#include "Components/TransformComponent.h"
 #include "Core/Application.h"
 
 #include "Material.h"
@@ -16,10 +18,7 @@
 namespace Prism {
 	struct UniformPacket
 	{
-		std::unique_ptr<Vulkan::UniformBuffer> transform = nullptr;
-
-		// TODO: other uniforms
-		Vulkan::DescriptorSet descriptor;
+		// TODO: mesh uniform buffers + their descriptor sets here
 	};
 
 	// ========= Tuples =====================================================
@@ -27,22 +26,28 @@ namespace Prism {
 	{
 		std::shared_ptr<Mesh> mesh;
 		Material material;
+		glm::mat4 transform;
+
 		UniformPacket* uniforms;
 
-		MeshRenderData(const std::shared_ptr<Mesh>& mesh, const Material& material, UniformPacket* uniforms)
+		MeshRenderData(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform, UniformPacket* uniforms)
 			: mesh(mesh)
 			, material(material)
+			, transform(transform)
 			, uniforms(uniforms) {}
 	};
 	// ======================================================================
 
 
 	// ========= Frame System ===============================================
-	constexpr uint8_t FRAME_COUNT = 2;
+	constexpr uint8_t FRAME_COUNT = 1;
 	constexpr uint8_t PACKET_COUNT = FRAME_COUNT + 1;
 
 	struct FramePacket
 	{
+		std::unique_ptr<Vulkan::UniformBuffer> cameraDataBuffer = nullptr;
+		Vulkan::DescriptorSet cameraDescriptor;
+
 		std::vector<MeshRenderData> meshData;
 	};
 
@@ -65,6 +70,8 @@ namespace Prism {
 	Vulkan::DescriptorPool* descriptorPool;
 
 	// ========= RenderObject System ========================================
+	CameraComponent* camera = nullptr;
+
 	std::unordered_set<EntityID> entities{};
 	std::unordered_map<EntityID, std::array<UniformPacket, PACKET_COUNT>> uniformPackets{};
 	// ======================================================================
@@ -85,7 +92,8 @@ namespace Prism {
 		renderPass = Vulkan::Defaults::GetDefaultRenderPass();
 		renderPass->SetClearValue(vk::ClearColorValue(std::array<float, 4>({ 0.2f, 0.2f, 0.2f, 1.0f })));
 
-		descriptorPool = new Vulkan::DescriptorPool(vk::DescriptorType::eUniformBuffer, 1, PACKET_COUNT);
+		// currently only handles camera descriptors
+		descriptorPool = new Vulkan::DescriptorPool(vk::DescriptorType::eUniformBufferDynamic, 1, PACKET_COUNT);
 	}
 
 	void Renderer::Shutdown()
@@ -114,6 +122,13 @@ namespace Prism {
 		currentFramePacket().meshData.clear();
 		currentFramePacket().meshData.reserve(entities.size());
 
+		if (!camera)
+		{
+			PR_CORE_ERROR("No camera registred to render.");
+			return;
+		}
+		currentFramePacket().cameraDataBuffer->UpdateNow(&camera->projViewMatrix);
+
 		for (const auto id : entities)
 		{
 			Entity* entity = Application::world->GetEntity(id);
@@ -141,12 +156,12 @@ namespace Prism {
 			}
 
 			UniformPacket* uniformPacket = &uniformPackets.find(id)->second[currentPacketIndex];
-			uniformPacket->transform.get()->UpdateNow(&transformComponent->transform);
-			uniformPacket->descriptor.Update(uniformPacket->transform.get());
+			// update mesh uniform buffers
 
 			currentFramePacket().meshData.emplace_back(
 				renderComponent->mesh,
 				*renderComponent->material,
+				transformComponent->transform,
 				uniformPacket
 			);
 		}
@@ -165,12 +180,16 @@ namespace Prism {
 			currentFrame().GetFramebuffer(),
 			vk::SubpassContents::eInline);
 
+		PR_CORE_ASSERT(currentFramePacket().meshData.size() > 0, "No meshes to render!");
+		const auto& pipelineSample = ShaderLibrary::PipelineOf(currentFramePacket().meshData[0].material.shader);
+		currentFrame().GetCommandBuffer().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineSample->GetLayout(), 0, { currentFramePacket().cameraDescriptor.GetHandle() }, {});
+
 		for (const auto& meshData : currentFramePacket().meshData)
 		{
 			const auto& pipeline = ShaderLibrary::PipelineOf(meshData.material.shader);
 			pipeline->Bind(currentFrame().GetCommandBuffer());
-			currentFrame().GetCommandBuffer().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline->GetLayout(), 0, { meshData.uniforms->descriptor.GetHandle() }, {});
 
+			currentFrame().GetCommandBuffer().pushConstants(pipeline->GetLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(meshData.transform), &meshData.transform);
 			drawMesh(meshData.mesh.get());
 		}
 
@@ -207,18 +226,43 @@ namespace Prism {
 				uniformPackets.insert({ id, std::array<UniformPacket, PACKET_COUNT>() });
 				for (auto& packet : uniformPackets[id])
 				{
-					packet.transform = std::make_unique<Vulkan::UniformBuffer>(sizeof(transform->transform));
-					packet.descriptor = descriptorPool->AllocateDescriptorSet(Vulkan::Defaults::GetDefaultUniformBufferDescriptor());
+					//packet.transform = std::make_unique<Vulkan::UniformBuffer>(sizeof(transform->transform));
 				}
 				return;
 			}
 		}
-		PR_CORE_ASSERT(false, "Cannot register this Entity.");
+		PR_CORE_ASSERT(false, "Cannot register this Entity as a RenderObject.");
+	}
+
+	void Renderer::UseCamera(EntityID id)
+	{
+		Entity* entity = Application::world->GetEntity(id);
+		if (entity)
+		{
+			CameraComponent* cameraComponent = entity->Get<CameraComponent>();
+			if (cameraComponent)
+			{
+				camera = cameraComponent;
+				for (auto& frame : framePackets)
+				{
+					frame.cameraDataBuffer = std::make_unique<Vulkan::UniformBuffer>(sizeof(camera->projViewMatrix));
+					frame.cameraDescriptor = descriptorPool->AllocateDescriptorSet(Vulkan::Defaults::GetDefaultUniformBufferDescriptor());
+					frame.cameraDescriptor.Update(frame.cameraDataBuffer.get());
+				}
+				return;
+			}
+		}
+		PR_CORE_ASSERT(false, "Cannot register this Entity as a Camera.");
 	}
 
 	void Renderer::Resize(uint32_t width, uint32_t height)
 	{
 		Vulkan::Context::Resize(width, height);
+
+		auto projection = glm::perspective(glm::radians(45.0f), (float)width/ (float)height, 0.1f, 10.0f);
+		projection[1][1] *= -1;
+		auto view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		camera->projViewMatrix = projection * view;
 		// TODO: recreate Descriptorpool
 	}
 }

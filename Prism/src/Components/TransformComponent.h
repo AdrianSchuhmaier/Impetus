@@ -9,6 +9,6 @@ namespace Prism {
 
 	struct TransformComponent : public Component
 	{
-		glm::mat4 transform;
+		glm::mat4 transform = glm::mat4(1.0f);
 	};
 }

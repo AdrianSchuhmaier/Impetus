@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include "Core/Application.h"
 #include "Core/Renderer/Renderer.h"
+#include "Components/CameraComponent.h"
 #include "Components/RenderComponent.h"
 #include "Components/TransformComponent.h"
 #include "Entity.h"

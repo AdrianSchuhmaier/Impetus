@@ -4,8 +4,6 @@
 #include "Core/Renderer/Buffer.h"
 
 #include "Entity.h"
-#include "Components/RenderComponent.h"
-#include "Components/TransformComponent.h"
 
 #include <unordered_set>
 
@@ -24,6 +22,7 @@ namespace Prism {
 
 		// Handle
 		static void Register(EntityID entity);
+		static void UseCamera(EntityID camera);
 		//static void Unregister(RenderObjectHandle renderObject);
 	};
 }

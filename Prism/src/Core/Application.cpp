@@ -25,13 +25,12 @@ namespace Prism {
 		while (m_Running)
 		{
 			auto dt = GetDeltaTime();
-
 			m_Window->OnUpdate();
-			
-			/*clientApp->*/OnUpdate(dt);
 
 			if (dt >= m_MinFrameDuration && !m_Minimized)
 			{
+				/*clientApp->*/OnUpdate(dt);
+
 				Renderer::Prepare();
 				Renderer::Render();
 				StepFrame();

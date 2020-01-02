@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include "Core/Renderer/Defaults/VulkanDefaults.h"
 #include "../Material.h"
 #include "Buffer.h"
 
@@ -13,7 +14,7 @@ namespace Prism::Vulkan {
 			const ShaderBinary& code,
 			const VertexBuffer::Descriptor& descriptor,
 			const std::vector<vk::DescriptorSetLayout>& descriptorSetLayouts = {},
-			const std::vector<vk::PushConstantRange>& pushConstants = {});
+			const std::vector<vk::PushConstantRange>& pushConstants = { Defaults::GetDefaultPushConstantRange() });
 
 		~Pipeline();
 

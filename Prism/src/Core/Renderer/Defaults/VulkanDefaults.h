@@ -12,6 +12,8 @@ namespace Prism::Vulkan {
 
 		static RenderPass* GetDefaultRenderPass();
 		static vk::DescriptorSetLayout GetDefaultUniformBufferDescriptor();
+
+		static vk::PushConstantRange GetDefaultPushConstantRange();
 	};
 
 }
