@@ -12,11 +12,7 @@ namespace Prism {
 		std::shared_ptr<Material> material = nullptr;
 
 		RenderComponent() = default;
-		RenderComponent(
-			const std::string& shaderFile,
-			const VertexBuffer::Layout& inputDescription,
-			uint32_t vertexCount,
-			std::unique_ptr<VertexBuffer>&& vb,
-			std::unique_ptr<IndexBuffer>&& ib);
+		RenderComponent(const std::shared_ptr<Mesh>& mesh, const std::shared_ptr<Material>& material)
+			: mesh(mesh), material(material) {}
 	};
 }

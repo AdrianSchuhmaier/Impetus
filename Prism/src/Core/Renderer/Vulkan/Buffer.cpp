@@ -7,6 +7,7 @@ namespace Prism::Vulkan {
 	{
 		if (allocation)
 			MemoryManager::FreeBuffer(this);
+		allocation = 0;
 	}
 
 	vk::Format generateVulkanDataType(const BufferDataType& dataType)

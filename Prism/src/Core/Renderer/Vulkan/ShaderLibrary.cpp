@@ -47,7 +47,7 @@ namespace Prism {
 			// create pipeline
 			s_Pipelines[file] = std::make_unique<Pipeline>(
 				spv.value(), Vulkan::VertexBuffer::GetVulkanDescriptor(inputDescription),
-				std::vector<vk::DescriptorSetLayout>({ Defaults::GetDefaultUniformBufferDescriptor() }));
+				std::vector<vk::DescriptorSetLayout>({ Defaults::GetDefaultCameraDescriptor(), Defaults::GetDefaultUniformDescriptor() }));
 
 			s_Pipelines[file]->Create(Defaults::GetDefaultRenderPass()->GetHandle());
 

@@ -3,6 +3,7 @@
 #include "vulkan/vulkan.hpp"
 #include "Context.h"
 #include "Buffer.h"
+#include "Texture.h"
 
 namespace Prism::Vulkan {
 
@@ -10,6 +11,8 @@ namespace Prism::Vulkan {
 	{
 	public:
 		void Update(UniformBuffer* buffer);
+		void Update(Texture2D* texture);
+
 		vk::DescriptorSet GetHandle() const { return m_Set; }
 
 	private:
@@ -22,10 +25,7 @@ namespace Prism::Vulkan {
 	{
 	public:
 		DescriptorPool() = default;
-		DescriptorPool(
-			vk::DescriptorType type,
-			uint32_t descriptorCount,
-			uint32_t maxDescriptorSets);
+		DescriptorPool(const std::vector<vk::DescriptorPoolSize>& sizes, uint32_t maxDescriptorSets);
 		DescriptorPool(DescriptorPool&& other);
 		DescriptorPool& operator=(DescriptorPool&& other);
 		DescriptorPool(const DescriptorPool&) = delete;

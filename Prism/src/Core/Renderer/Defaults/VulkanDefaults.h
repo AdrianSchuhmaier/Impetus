@@ -11,7 +11,11 @@ namespace Prism::Vulkan {
 		static void CleanUp();
 
 		static RenderPass* GetDefaultRenderPass();
-		static vk::DescriptorSetLayout GetDefaultUniformBufferDescriptor();
+		static vk::DescriptorSetLayout GetDefaultCameraDescriptor();
+		static vk::DescriptorSetLayout GetDefaultUniformDescriptor();
+
+
+		static vk::Sampler GetDefaultTextureSampler();
 
 		static vk::PushConstantRange GetDefaultPushConstantRange();
 	};

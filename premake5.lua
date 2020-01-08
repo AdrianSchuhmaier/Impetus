@@ -25,7 +25,7 @@ includedir["VulkanShader"] = (os.getenv("VK_SDK_PATH") .. "/shaderc/libshader/in
 includedir["ImGui"] = "Prism/vendor/imgui"
 includedir["spdlog"] = "Prism/vendor/spdlog/include"
 includedir["glm"] = "Prism/vendor/glm"
-includedir["stb_image"] = "Prism/vendor/stb_image"
+--includedir["stb_image"] = "Prism/vendor/stb_image"
 
 group "Dependencies"
 	include "Prism/vendor/GLFW"
@@ -99,6 +99,7 @@ project "Game"
 	objdir ("bin-int/%{prj.name}-" .. outputdir)
 
 	files {
+		"%{prj.name}/assets/icon/Game.rc",
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp"
 	}
@@ -109,6 +110,10 @@ project "Game"
         "%{includedir.glm}"
 	}
 	
+	resincludedirs {
+		"%{prj.name}"
+	}
+
 	links {
 		"Prism"
 	}

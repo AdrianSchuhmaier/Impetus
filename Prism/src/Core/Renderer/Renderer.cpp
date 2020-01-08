@@ -19,6 +19,7 @@ namespace Prism {
 	struct UniformPacket
 	{
 		// TODO: mesh uniform buffers + their descriptor sets here
+		Vulkan::DescriptorSet textureDescriptor;
 	};
 
 	// ========= Tuples =====================================================
@@ -92,8 +93,8 @@ namespace Prism {
 		renderPass = Vulkan::Defaults::GetDefaultRenderPass();
 		renderPass->SetClearValue(vk::ClearColorValue(std::array<float, 4>({ 0.2f, 0.2f, 0.2f, 1.0f })));
 
-		// currently only handles camera descriptors
-		descriptorPool = new Vulkan::DescriptorPool(vk::DescriptorType::eUniformBufferDynamic, 1, PACKET_COUNT);
+		std::vector<vk::DescriptorPoolSize> sizes{ {vk::DescriptorType::eUniformBufferDynamic, 1}, {vk::DescriptorType::eCombinedImageSampler, 1} };
+		descriptorPool = new Vulkan::DescriptorPool(sizes, 2 * PACKET_COUNT);
 	}
 
 	void Renderer::Shutdown()
@@ -189,6 +190,7 @@ namespace Prism {
 			const auto& pipeline = ShaderLibrary::PipelineOf(meshData.material.shader);
 			pipeline->Bind(currentFrame().GetCommandBuffer());
 
+			currentFrame().GetCommandBuffer().bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipeline->GetLayout(), 1, { meshData.uniforms->textureDescriptor.GetHandle() }, {});
 			currentFrame().GetCommandBuffer().pushConstants(pipeline->GetLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(meshData.transform), &meshData.transform);
 			drawMesh(meshData.mesh.get());
 		}
@@ -220,13 +222,14 @@ namespace Prism {
 		Entity* entity = Application::world->GetEntity(id);
 		if (entity)
 		{
-			TransformComponent* transform = entity->Get<TransformComponent>();
-			if (transform && uniformPackets.find(id) == uniformPackets.end())
+			RenderComponent* rc = entity->Get<RenderComponent>();
+			if (rc && uniformPackets.find(id) == uniformPackets.end())
 			{
 				uniformPackets.insert({ id, std::array<UniformPacket, PACKET_COUNT>() });
 				for (auto& packet : uniformPackets[id])
 				{
-					//packet.transform = std::make_unique<Vulkan::UniformBuffer>(sizeof(transform->transform));
+					packet.textureDescriptor = descriptorPool->AllocateDescriptorSet(Vulkan::Defaults::GetDefaultUniformDescriptor());
+					packet.textureDescriptor.Update(static_cast<Vulkan::Texture2D*>(rc->material->properties.texture.get()));
 				}
 				return;
 			}
@@ -246,7 +249,7 @@ namespace Prism {
 				for (auto& frame : framePackets)
 				{
 					frame.cameraDataBuffer = std::make_unique<Vulkan::UniformBuffer>(sizeof(camera->projViewMatrix));
-					frame.cameraDescriptor = descriptorPool->AllocateDescriptorSet(Vulkan::Defaults::GetDefaultUniformBufferDescriptor());
+					frame.cameraDescriptor = descriptorPool->AllocateDescriptorSet(Vulkan::Defaults::GetDefaultCameraDescriptor());
 					frame.cameraDescriptor.Update(frame.cameraDataBuffer.get());
 				}
 				return;
@@ -259,9 +262,9 @@ namespace Prism {
 	{
 		Vulkan::Context::Resize(width, height);
 
-		auto projection = glm::perspective(glm::radians(45.0f), (float)width/ (float)height, 0.1f, 10.0f);
+		auto projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 10.0f);
 		projection[1][1] *= -1;
-		auto view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		auto view = glm::lookAt(glm::vec3(.5f, .5f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		camera->projViewMatrix = projection * view;
 		// TODO: recreate Descriptorpool
 	}

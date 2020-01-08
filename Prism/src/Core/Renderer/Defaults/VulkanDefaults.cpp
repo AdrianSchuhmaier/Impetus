@@ -6,7 +6,10 @@
 namespace Prism::Vulkan {
 
 	RenderPass* s_DefaultRenderPass = nullptr;
-	vk::DescriptorSetLayout s_DefaultUniformBufferDescriptor = nullptr;
+	vk::DescriptorSetLayout s_DefaultCameraDescriptor = nullptr;
+	vk::DescriptorSetLayout s_DefaultUniformDescriptor = nullptr;
+
+	vk::Sampler s_TextureSampler = nullptr;
 
 	void Defaults::Init()
 	{
@@ -18,9 +21,14 @@ namespace Prism::Vulkan {
 		if (s_DefaultRenderPass)
 			delete s_DefaultRenderPass;
 
-		if (s_DefaultUniformBufferDescriptor)
-			Context::GetDevice().destroyDescriptorSetLayout(s_DefaultUniformBufferDescriptor);
+		if (s_DefaultCameraDescriptor)
+			Context::GetDevice().destroyDescriptorSetLayout(s_DefaultCameraDescriptor);
 
+		if (s_DefaultUniformDescriptor)
+			Context::GetDevice().destroyDescriptorSetLayout(s_DefaultUniformDescriptor);
+
+		if (s_TextureSampler)
+			Context::GetDevice().destroySampler(s_TextureSampler);
 	}
 
 	RenderPass* Defaults::GetDefaultRenderPass() {
@@ -52,19 +60,66 @@ namespace Prism::Vulkan {
 		return s_DefaultRenderPass;
 	}
 
-	vk::DescriptorSetLayout Defaults::GetDefaultUniformBufferDescriptor()
+	vk::DescriptorSetLayout Defaults::GetDefaultCameraDescriptor()
 	{
-		if (!s_DefaultUniformBufferDescriptor)
+		if (!s_DefaultCameraDescriptor)
 		{
-			vk::DescriptorSetLayoutBinding binding(0,
+			vk::DescriptorSetLayoutBinding cameraBinding(0,
 				vk::DescriptorType::eUniformBuffer, 1,
 				vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
-			vk::DescriptorSetLayoutCreateInfo createInfo(vk::DescriptorSetLayoutCreateFlags(), 1, &binding);
 
-			s_DefaultUniformBufferDescriptor = Context::GetDevice().createDescriptorSetLayout(createInfo);
+			std::array<vk::DescriptorSetLayoutBinding, 1> bindings = { cameraBinding };
+
+			vk::DescriptorSetLayoutCreateInfo createInfo(vk::DescriptorSetLayoutCreateFlags(),
+				static_cast<uint32_t>(bindings.size()), bindings.data());
+
+			s_DefaultCameraDescriptor = Context::GetDevice().createDescriptorSetLayout(createInfo);
 		}
 
-		return s_DefaultUniformBufferDescriptor;
+		return s_DefaultCameraDescriptor;
+	}
+
+	vk::DescriptorSetLayout Defaults::GetDefaultUniformDescriptor()
+	{
+		if (!s_DefaultUniformDescriptor)
+		{
+			vk::DescriptorSetLayoutBinding textureBinding(0,
+				vk::DescriptorType::eCombinedImageSampler, 1,
+				vk::ShaderStageFlagBits::eFragment);
+
+			std::array<vk::DescriptorSetLayoutBinding, 1> bindings = { textureBinding };
+			
+			vk::DescriptorSetLayoutCreateInfo createInfo(vk::DescriptorSetLayoutCreateFlags(),
+				static_cast<uint32_t>(bindings.size()), bindings.data());
+
+			s_DefaultUniformDescriptor = Context::GetDevice().createDescriptorSetLayout(createInfo);
+		}
+		return s_DefaultUniformDescriptor;
+	}
+
+	vk::Sampler Defaults::GetDefaultTextureSampler()
+	{
+		if (!s_TextureSampler)
+		{
+			vk::SamplerCreateInfo samplerInfo = {};
+			samplerInfo.magFilter = vk::Filter::eLinear;
+			samplerInfo.minFilter = vk::Filter::eLinear;
+			samplerInfo.addressModeU = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeV = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.addressModeW = vk::SamplerAddressMode::eRepeat;
+			samplerInfo.anisotropyEnable = VK_TRUE;
+			samplerInfo.maxAnisotropy = 16;
+			samplerInfo.borderColor = vk::BorderColor::eIntOpaqueBlack;
+			samplerInfo.unnormalizedCoordinates = false;
+			samplerInfo.compareEnable = false;
+			samplerInfo.compareOp = vk::CompareOp::eAlways;
+			samplerInfo.mipmapMode = vk::SamplerMipmapMode::eLinear;
+
+			//TODO: anisotropy query
+
+			s_TextureSampler = Context::GetDevice().createSampler(samplerInfo);
+		}
+		return s_TextureSampler;
 	}
 
 	vk::PushConstantRange Defaults::GetDefaultPushConstantRange()

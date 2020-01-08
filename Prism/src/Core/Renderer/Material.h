@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Buffer.h"
+#include "Texture.h"
 
 namespace Prism {
 
 	using ShaderHandle = std::string;
-	
+
 	enum class ShaderType {
 		Vertex, Fragment, Compute, Geometry, TesselationControl, TesselationEvaluation
 	};
@@ -15,13 +16,19 @@ namespace Prism {
 
 	struct Material
 	{
+		struct Properties {
+			std::shared_ptr<Texture2D> texture = nullptr;
+
+			Properties(const std::shared_ptr<Texture2D>& texture) : texture(texture) {}
+		};
+
 		// shader filename is the handle
 		ShaderHandle shader;
+		Properties properties;
 
-		// TODO: properties
 
 		Material() = default;
-		Material(const std::string& file, const VertexBuffer::Layout& inputDescription);
+		Material(const std::string& file, const VertexBuffer::Layout& inputDescription, const Properties& props = { nullptr });
 		~Material();
 	};
 }

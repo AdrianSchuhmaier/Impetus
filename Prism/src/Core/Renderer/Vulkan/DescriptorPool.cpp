@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "DescriptorPool.h"
+#include "Core/Renderer/Defaults/VulkanDefaults.h"
 
 namespace Prism::Vulkan {
 
-	DescriptorPool::DescriptorPool(vk::DescriptorType type, uint32_t descriptorCount, uint32_t maxDescriptorSets)
+	DescriptorPool::DescriptorPool(const std::vector<vk::DescriptorPoolSize>& sizes, uint32_t maxDescriptorSets)
 	{
-		vk::DescriptorPoolSize sizeInfo(type, descriptorCount);
-		vk::DescriptorPoolCreateInfo createInfo(vk::DescriptorPoolCreateFlags(), maxDescriptorSets, 1, &sizeInfo);
+		vk::DescriptorPoolCreateInfo createInfo(vk::DescriptorPoolCreateFlags(), maxDescriptorSets,
+			static_cast<uint32_t>(sizes.size()), sizes.data());
 		m_Pool = Context::GetDevice().createDescriptorPool(createInfo);
 	}
 
@@ -49,6 +50,13 @@ namespace Prism::Vulkan {
 	{
 		vk::DescriptorBufferInfo bufferInfo(buffer->GetBuffer().bufferHandle, 0, buffer->GetSize());
 		vk::WriteDescriptorSet writeSet(m_Set, 0, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferInfo);
+		Context::GetDevice().updateDescriptorSets(1, &writeSet, 0, nullptr);
+	}
+
+	void DescriptorSet::Update(Texture2D* texture)
+	{
+		vk::DescriptorImageInfo imageInfo(Defaults::GetDefaultTextureSampler(), texture->GetImage().imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
+		vk::WriteDescriptorSet writeSet(m_Set, 0, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo);
 		Context::GetDevice().updateDescriptorSets(1, &writeSet, 0, nullptr);
 	}
 }
